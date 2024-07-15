@@ -45,18 +45,6 @@ def recommendation():
         return jsonify({'Error':'No Data Entered'})
     threshold=0.85
     return jsonify(recommend(resume,jds,threshold))
-if __name__=='__main__':
-    app.run()
-
-
-
-
-@app.route('/recommend/',methods=['GET'])
-def recc():
-    data=request.args.get('resume')
-    
-    return jsonify({"Choo Choo": "Welcome to your Flask app 🚅"})
-
 
 if __name__ == '__main__':
     app.run(debug=True, port=os.getenv("PORT", default=5000))
