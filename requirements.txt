@@ -8,5 +8,6 @@ Werkzeug==1.0.1
 torch
 transformer
 re
+spacy
 numpy
 scikit-learn
