@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 import os
 # RECOMMENDATION
 import torch
+import regext as re
 from transformers import BertTokenizer, BertModel
 import re
 import numpy as np
