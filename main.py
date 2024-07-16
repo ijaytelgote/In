@@ -8,16 +8,16 @@ def recommend(resume_text, job_descriptions, threshold=0.85):
     # Vectorize job descriptions and resume
     vectorizer = TfidfVectorizer(stop_words='english')
     job_matrix = vectorizer.fit_transform(job_descriptions + [resume_text])
-    resume_vector = job_matrix[-1]  # Vector representation of your resume
+    
+    # Separate the vectorized resume
+    resume_vector = job_matrix[-1]
+    job_matrix = job_matrix[:-1]
     
     # Calculate cosine similarity between resume and each job description
-    similarities = cosine_similarity(job_matrix[:-1], resume_vector.T).flatten()
+    similarities = cosine_similarity(job_matrix, resume_vector).flatten()
     
     # Find job descriptions with similarity above threshold
-    recommended_jobs = []
-    for i, sim in enumerate(similarities):
-        if sim >= threshold:
-            recommended_jobs.append(job_descriptions[i])
+    recommended_jobs = [job_descriptions[i] for i, sim in enumerate(similarities) if sim >= threshold]
     
     return recommended_jobs
 
