@@ -9,3 +9,4 @@ regex
 spacy
 numpy
 scikit-learn
+flask-cors
