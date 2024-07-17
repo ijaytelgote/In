@@ -25,7 +25,7 @@ def recommend(resume_text, job_descriptions, threshold=0.85):
     
     return recommended_jobs
 
-@app.route('/recommend', methods=['POST'])
+@app.route('/recommends/', methods=['POST'])
 def recommendation():
     data = request.get_json()
     if not data:
