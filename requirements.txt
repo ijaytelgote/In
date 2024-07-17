@@ -10,3 +10,5 @@ spacy
 numpy
 scikit-learn
 flask-cors
+nltk
+string
