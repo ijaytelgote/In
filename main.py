@@ -4,9 +4,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
 
-# Initialize an empty dictionary to store user-input job descriptions
-user_job_descriptions = {}
-
 def recommend(resume_text, job_descriptions, threshold=0.85):
     # Extract job descriptions and titles from dictionary
     titles = list(job_descriptions.keys())
@@ -28,27 +25,17 @@ def recommend(resume_text, job_descriptions, threshold=0.85):
     
     return recommended_jobs
 
-@app.route('/add_job/', methods=['POST'])
-def add_job():
-    data = request.json
-    title = data.get('title')
-    description = data.get('description')
-    
-    if not title or not description:
-        return jsonify({'Error': 'Title or Description missing in request body'})
-    
-    user_job_descriptions[title] = description
-    return jsonify({'message': f'Job "{title}" added successfully'})
-
-@app.route('/recommend/', methods=['GET'])
+@app.route('/recommend/', methods=['POST'])
 def recommendation():
-    resume = request.args.get('resume')
+    data = request.get_json()
+    resume = data.get('resume')
+    job_descriptions = data.get('job_descriptions', {})
     
-    if not resume:
-        return jsonify({'Error': 'No Resume Data Entered'})
+    if not resume or not job_descriptions:
+        return jsonify({'Error': 'No Data Entered'})
     
-    threshold = float(request.args.get('threshold', 0.85))
-    recommended_jobs = recommend(resume, user_job_descriptions, threshold)
+    threshold = float(data.get('threshold', 0.85))
+    recommended_jobs = recommend(resume, job_descriptions, threshold)
     
     return jsonify({'recommendations': recommended_jobs})
 
