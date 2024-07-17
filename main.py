@@ -32,4 +32,21 @@ def recommendation():
         return jsonify({'Error': 'No data received'}), 400
     
     resume = data.get('resume')
-    job_des
+    job_descriptions = data.get('job_descriptions', {})
+    
+    if not resume:
+        return jsonify({'Error': 'Resume not provided'}), 400
+    if not job_descriptions:
+        return jsonify({'Error': 'Job descriptions not provided'}), 400
+    
+    try:
+        threshold = float(data.get('threshold', 0.85))
+    except ValueError:
+        return jsonify({'Error': 'Invalid threshold value'}), 400
+    
+    recommended_jobs = recommend(resume, job_descriptions, threshold)
+    
+    return jsonify({'recommendations': recommended_jobs})
+
+if __name__ == '__main__':
+    app.run(debug=True)
