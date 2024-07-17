@@ -25,19 +25,11 @@ def recommend(resume_text, job_descriptions, threshold=0.85):
     
     return recommended_jobs
 
-@app.route('/recommend/', methods=['POST'])
+@app.route('/recommend', methods=['POST'])
 def recommendation():
     data = request.get_json()
+    if not data:
+        return jsonify({'Error': 'No data received'}), 400
+    
     resume = data.get('resume')
-    job_descriptions = data.get('job_descriptions', {})
-    
-    if not resume or not job_descriptions:
-        return jsonify({'Error': 'No Data Entered'})
-    
-    threshold = float(data.get('threshold', 0.85))
-    recommended_jobs = recommend(resume, job_descriptions, threshold)
-    
-    return jsonify({'recommendations': recommended_jobs})
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    job_des
