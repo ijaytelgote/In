@@ -1,49 +1,60 @@
+import string
+
+import nltk
 from flask import Flask, jsonify, request
+from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from flask_cors import CORS
+
+# Download NLTK data
+nltk.download('stopwords')
 
 app = Flask(__name__)
-CORS(app)
 
-def recommend(resume_text, job_descriptions, threshold=0.85):
-    titles = list(job_descriptions.keys())
-    jds = list(job_descriptions.values())
-    
-    vectorizer = TfidfVectorizer(stop_words='english')
-    job_matrix = vectorizer.fit_transform(jds + [resume_text])
-    
-    resume_vector = job_matrix[-1]
-    job_matrix = job_matrix[:-1]
-    
-    similarities = cosine_similarity(job_matrix, resume_vector).flatten()
-    
-    recommended_jobs = [titles[i] for i, sim in enumerate(similarities) if sim >= threshold]
-    
-    return recommended_jobs
+def preprocess_text(text):
+    # Lowercase the text
+    text = text.lower()
+    # Remove punctuation
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    # Remove stopwords
+    stop_words = set(stopwords.words('english'))
+    text = ' '.join([word for word in text.split() if word not in stop_words])
+    return text
 
-@app.route('/recommend', methods=['POST'])
-def recommendation():
-    data = request.get_json()
-    if not data:
-        return jsonify({'Error': 'No data received'}), 400
-    
-    resume = data.get('resume')
-    job_descriptions = data.get('job_descriptions', {})
-    
-    if not resume:
-        return jsonify({'Error': 'Resume not provided'}), 400
-    if not job_descriptions:
-        return jsonify({'Error': 'Job descriptions not provided'}), 400
-    
-    try:
-        threshold = float(data.get('threshold', 0.85))
-    except ValueError:
-        return jsonify({'Error': 'Invalid threshold value'}), 400
-    
-    recommended_jobs = recommend(resume, job_descriptions, threshold)
-    
-    return jsonify({'recommendations': recommended_jobs})
+@app.route('/match', methods=['POST'])
+def match_resume_to_jobs():
+    data = request.json
+    resume = data['resume']
+    job_descriptions_dict = data['job_descriptions']
+
+    # Preprocess the resume
+    resume = preprocess_text(resume)
+
+    # Separate job titles and their descriptions
+    job_titles = list(job_descriptions_dict.keys())
+    job_descriptions = [preprocess_text(desc) for desc in job_descriptions_dict.values()]
+
+    # Combine all texts for vectorization
+    all_texts = [resume] + job_descriptions
+
+    # Vectorize the texts using TF-IDF
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(all_texts)
+
+    # Calculate cosine similarity
+    cosine_similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
+
+    # Find the best match
+    best_match_index = cosine_similarities.argmax()
+    best_match_score = cosine_similarities[best_match_index]
+    best_match_title = job_titles[best_match_index]
+
+    response = {
+        'best_match_title': best_match_title,
+        'best_match_score': best_match_score,
+    }
+
+    return jsonify(response)
 
 if __name__ == '__main__':
     app.run(debug=True)
