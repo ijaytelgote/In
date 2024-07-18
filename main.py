@@ -10,8 +10,9 @@ import pendulum
 import spacy
 from flask import Flask, jsonify, request
 from spacy.matcher import Matcher
+import en_core_web_sm
 
-nlp = spacy.load('en_core_web_sm')
+nlp = en_core_web_sm.load()
 nltk.download('stopwords')
 
 app = Flask(__name__)
