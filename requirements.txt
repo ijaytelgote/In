@@ -8,6 +8,7 @@ Werkzeug==1.0.1
 regex
 spacy
 numpy
+pendulum
 scikit-learn
 flask-cors
 nltk
